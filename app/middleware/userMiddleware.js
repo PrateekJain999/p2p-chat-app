@@ -7,7 +7,7 @@ const auth = async (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '')
         const decoded = commonFunctions.decryptJwt(token);
-        const user = await userService.getUser({ _id: decoded._id, 'tokens.token': token });
+        const user = await userService.getUser({ _id: decoded._id});
 
         if (!user) {
             throw new Error();

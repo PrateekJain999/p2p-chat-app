@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const {auth, joiValidation} = require('../../middleware/userMiddleware')
+const {sendMail} = require('../../utils/index')
+const commonFunctions = require('../../utils/utils')
 const userRouters = express.Router();
 
 
@@ -26,15 +28,9 @@ userRouters.post('/users/login', async (req, res) => {
 
         if (user) {
             if (commonFunctions.compareHash(req.body.password, user.password)) {
-                let tokens = user.tokens;
-
                 const token = commonFunctions.encryptJwt({ _id: user._id.toString() })
-                tokens.push({ token });
-
-                await userService.updateUser({ _id: user._id }, { tokens });
 
                 delete user.password;
-                delete user.tokens;
 
                 res.json({ user, token })
             }
@@ -53,32 +49,15 @@ userRouters.post('/users/login', async (req, res) => {
 
 userRouters.post('/users/logout', auth, async (req, res) => {
     try {
-        tokens = req.user.tokens.filter((token) => {
-            return token.token !== req.token
-        });
-
-        await userService.updateUser({ _id: req.user._id }, { tokens });
-
         res.json({ success: true })
     } catch (e) {
         res.status(500).send(e.message)
     }
 });
 
-userRouters.post('/users/logoutAll', auth, async (req, res) => {
-    try {
-        tokens = []
-        await userService.updateUser({ _id: req.user._id }, { tokens });
-        res.send({ success: true });
-    } catch (e) {
-        res.status(500).send(e.message)
-    }
-});
 
 userRouters.get('/users/me', auth, async (req, res) => {
-
     delete req.user.password;
-    delete req.user.tokens;
     res.send(req.user)
 });
 
@@ -95,7 +74,6 @@ userRouters.patch('/users/me', auth, async (req, res) => {
     try {
         let user = await userService.updateUser({ _id: req.user._id }, req.body);
 
-        delete user.tokens;
         delete user.password;
 
         res.json({ success: true, user })

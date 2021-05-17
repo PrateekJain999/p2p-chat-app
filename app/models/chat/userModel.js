@@ -10,9 +10,8 @@ const userSchema = new Schema({
     lastname: { type: String },
     email: { type: String },
     password: { type: String },
-    gender: { type: String , enum : ['Male','Female'] },
+    gender: { type: String , enum : ['male','female'] },
     phone: {type: Number},
-    repeat_password: {type: String},
     socketid : {type: String}
 }, {timeStamps: true});
 
