@@ -1,73 +1,43 @@
-'use strict';
+const { userModel, noteModel } = require('../../models/index');
+const commonFunctions = require('../../utils/utils');
 
-let userService = {};
+userService = {};
 
-/** 
- * function to register a new  user
+/**
+ * function to register user.
  */
 userService.registerUser = async (payload) => {
-  // encrypt user's password and store it in the database.
-  payload.password = utils.hashPassword(payload.password);
-  return await userModel(payload).save();
+    // encrypt user's password and store it in the database.
+    payload.password = commonFunctions.hashPassword(payload.password);
+    return await userModel(payload).save();
 };
 
 /**
  * function to update user.
  */
-userService.updateUser = async (criteria, dataToUpdate, projection = {}) => {
-  let userData = await userService.getUser(criteria);
-  let updatedUserData = await userModel.findOneAndUpdate(criteria, dataToUpdate, { new: true, projection: projection }).lean();
-  return updatedUserData;
+userService.updateUser = async (criteria, dataToUpdate) => {
+    return await userModel.findOneAndUpdate(criteria, dataToUpdate, { upsert: true, new: true }).lean();
 };
 
 /**
- * function to fetch user from the system based on criteria.
+ * function to delete user.
  */
-userService.getUser = async (criteria, projection, options = {}) => {
-  return await userModel.findOne(criteria, projection, options)
-};
-
-
-/**
- * function to create new user into the system.
- */
-userService.createUser = async (payload) => {
-  // fetch initial rank type and rank value for new user. 
-  let defaultRankType = await rankTypeModel.findOne({ isDefault: true, isDeleted: false });
-  payload.rankType = defaultRankType._id;
-  payload.rankValue = defaultRankType.maxRank;
-  return await userModel(payload).save();
+userService.deleteUser = async (criteria) => {
+    return await userModel.findOneAndRemove(criteria).lean();
 };
 
 /**
- * function to get user's current rank.
+ * function to fetch user with criteria.
  */
-userService.getUserRank = async (userId) => {
-  let user = await userModel.findOne({ _id: userId }).lean();
+userService.getUser = async (criteria, projection = {}) => {
+    return await userModel.findOne(criteria, projection).lean();
 };
 
 /**
- * function to fetch count of users from the system based on criteria.
+ * function to get user.
  */
-userService.getCountOfUsers = async (criteria) => {
-  return await userModel.countDocuments(criteria);
+userService.getUsers = async (criteria) => {
+    return await userModel.find(criteria)
 };
-
-/**
- * function to fetch users from the system based on criteria.
- */
-userService.getUsers = async (criteria, projection, options) => {
-  return await userModel.find(criteria, projection, options);
-};
-
-userService.addUsers = async (userIds, teacher_email) => {
-  return await userModel.aggregate([
-    { $match: { _id: { $in: userIds } } },
-    {$set: {assign_teacher: {$concatArrays: ['$assign_teacher', [teacher_email]]}}},
-    { $project: { assign_teacher: { $setIntersection: [ "$assign_teacher", "$assign_teacher" ] }}},
-    { $merge: { into: 'users' } }
-  ])
-};
-
 
 module.exports = userService;

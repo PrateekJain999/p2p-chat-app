@@ -12,6 +12,7 @@ const userSchema = new Schema({
     password: { type: String },
     gender: { type: String , enum : ['Male','Female'] },
     phone: {type: Number},
+    repeat_password: {type: String},
     socketid : {type: String}
 }, {timeStamps: true});
 

@@ -11,7 +11,7 @@ const conversationSchema = new Schema({
     message: {type: String}
 }, {timeStamps: true});
 
-module.exports = MONGOOSE.model('user', conversationSchema);
+module.exports = MONGOOSE.model('conversation', conversationSchema);
 
 
 

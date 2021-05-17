@@ -1,8 +1,8 @@
 'use strict';
 /********************************
- **** Managing all the services ***
+ **** Managing all the routes ***
  ********* independently ********
  ********************************/
 module.exports = {
-    userService: require('./chat/userService'),
+    userRoutes: require('./chat/userRoute')
 };
